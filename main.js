@@ -1,4 +1,4 @@
-import { mat4, quat } from 'glm';
+import { vec3, mat4, quat } from 'glm';
 
 import * as WebGPU from 'engine/WebGPU.js';
 import { ResizeSystem } from 'engine/systems/ResizeSystem.js';
@@ -44,29 +44,65 @@ camera.addComponent(new Camera({
 }));
 scene.addChild(camera);
 
-const tile = new Node();
-tile.addComponent(new Transform({
-    scale: [0.05, 0.05, 0.05],
-}));
-tile.addComponent(new Model({
-    primitives: [
-        new Primitive({
-            mesh: resources.mesh,
-            material: new Material({
-                baseTexture: new Texture({
-                    image: resources.image1,
-                    sampler: new Sampler({
-                        minFilter: 'nearest',
-                        magFilter: 'nearest',
-                        addressModeU: 'repeat',
-                        addressModeV: 'repeat',
+// Create a 2D array of tiles (15x15)
+const tileSize = 0.06; // Size of each tile
+const gridSize = 15; // Number of tiles in each dimension
+const gridOffset = [-0.5, 0, -0.5]; // Offset of the grid
+
+for (let i = 0; i < gridSize; i++) {
+    for (let j = 0; j < gridSize; j++) {
+        const tile = new Node();
+        const image = (i + j) % 2 === 0 ? resources.image1 : resources.image2;
+        let tileTranslation = [i * tileSize * 2, 0, j * tileSize * 2];
+        vec3.add(tileTranslation, tileTranslation, gridOffset);
+        tile.addComponent(new Transform({
+            translation: tileTranslation,
+            scale: [tileSize, tileSize, tileSize],
+        }));
+        tile.addComponent(new Model({
+            primitives: [
+                new Primitive({
+                    mesh: resources.mesh,
+                    material: new Material({
+                        baseTexture: new Texture({
+                            image: image,
+                            sampler: new Sampler({
+                                minFilter: 'nearest',
+                                magFilter: 'nearest',
+                                addressModeU: 'repeat',
+                            }),
+                        }),
                     }),
                 }),
-            }),
-        }),
-    ],
-}));
-scene.addChild(tile);
+            ],
+        }));
+        scene.addChild(tile);
+    }
+}
+
+// const tile = new Node();
+// tile.addComponent(new Transform({
+//     scale: [0.05, 0.05, 0.05],
+// }));
+// tile.addComponent(new Model({
+//     primitives: [
+//         new Primitive({
+//             mesh: resources.mesh,
+//             material: new Material({
+//                 baseTexture: new Texture({
+//                     image: resources.image1,
+//                     sampler: new Sampler({
+//                         minFilter: 'nearest',
+//                         magFilter: 'nearest',
+//                         addressModeU: 'repeat',
+//                         addressModeV: 'repeat',
+//                     }),
+//                 }),
+//             }),
+//         }),
+//     ],
+// }));
+// scene.addChild(tile);
 
 function update(t, dt) {
     scene.traverse(node => {
