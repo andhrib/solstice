@@ -4,6 +4,7 @@ import * as WebGPU from 'engine/WebGPU.js';
 import { ResizeSystem } from 'engine/systems/ResizeSystem.js';
 import { UpdateSystem } from 'engine/systems/UpdateSystem.js';
 import { UnlitRenderer } from 'engine/renderers/UnlitRenderer.js';
+import { Tile } from './custom/Tile.js';
 
 import {
     Camera,
@@ -20,8 +21,8 @@ import { loadResources } from 'engine/loaders/resources.js';
 
 const resources = await loadResources({
     'mesh': new URL('models/tile/tile.json', import.meta.url),
-    'image1': new URL('models/tile/solstice_dusk.jpg', import.meta.url),
-    'image2': new URL('models/tile/solstice_night.jpg', import.meta.url),
+    'image1': new URL('models/tile/Ground_Night_Diffuse1.png', import.meta.url),
+    'image2': new URL('models/tile/Ground_Night_Diffuse2.png', import.meta.url),
 });
 
 const canvas = document.querySelector('canvas');
@@ -31,7 +32,7 @@ await renderer.initialize();
 const scene = new Node();
 
 const camera = new Node();
-let cameraPosition = [1, 1, 1];
+let cameraPosition = [1.5, 1, 1.5];
 let cameraRotation = quat.create();
 quat.rotateY(cameraRotation, cameraRotation, Math.PI / 4);
 quat.rotateX(cameraRotation, cameraRotation, -Math.PI / 4);
@@ -45,40 +46,45 @@ camera.addComponent(new Camera({
 scene.addChild(camera);
 
 // Create a 2D array of tiles (15x15)
-const tileSize = 0.06; // Size of each tile
 const gridSize = 15; // Number of tiles in each dimension
-const gridOffset = [-0.5, 0, -0.5]; // Offset of the grid
-
-for (let i = 0; i < gridSize; i++) {
-    for (let j = 0; j < gridSize; j++) {
-        const tile = new Node();
-        const image = (i + j) % 2 === 0 ? resources.image1 : resources.image2;
-        let tileTranslation = [i * tileSize * 2, 0, j * tileSize * 2];
-        vec3.add(tileTranslation, tileTranslation, gridOffset);
-        tile.addComponent(new Transform({
-            translation: tileTranslation,
-            scale: [tileSize, tileSize, tileSize],
-        }));
-        tile.addComponent(new Model({
-            primitives: [
-                new Primitive({
-                    mesh: resources.mesh,
-                    material: new Material({
-                        baseTexture: new Texture({
-                            image: image,
-                            sampler: new Sampler({
-                                minFilter: 'nearest',
-                                magFilter: 'nearest',
-                                addressModeU: 'repeat',
-                            }),
-                        }),
-                    }),
-                }),
-            ],
-        }));
-        scene.addChild(tile);
+const tileNodeArr = Array.from({ length: gridSize }, () => (Array.from({ length: gridSize }, () => new Node())));
+for (let x = 0; x < gridSize; x++) {
+    for (let y = 0; y < gridSize; y++) {
+        tileNodeArr[x][y].addComponent(new Tile(tileNodeArr, resources, { x, y }));
+        scene.addChild(tileNodeArr[x][y]);
     }
 }
+
+// for (let i = 0; i < gridSize; i++) {
+//     for (let j = 0; j < gridSize; j++) {
+//         const tile = new Node();
+//         const image = (i + j) % 2 === 0 ? resources.image1 : resources.image2;
+//         let tileTranslation = [i * tileSize * 2, 0, j * tileSize * 2];
+//         vec3.add(tileTranslation, tileTranslation, gridOffset);
+//         tile.addComponent(new Transform({
+//             translation: tileTranslation,
+//             scale: [tileSize, tileSize, tileSize],
+//         }));
+//         tile.addComponent(new Model({
+//             primitives: [
+//                 new Primitive({
+//                     mesh: resources.mesh,
+//                     material: new Material({
+//                         baseTexture: new Texture({
+//                             image: image,
+//                             sampler: new Sampler({
+//                                 minFilter: 'nearest',
+//                                 magFilter: 'nearest',
+//                                 addressModeU: 'repeat',
+//                             }),
+//                         }),
+//                     }),
+//                 }),
+//             ],
+//         }));
+//         scene.addChild(tile);
+//     }
+// }
 
 // const tile = new Node();
 // tile.addComponent(new Transform({
