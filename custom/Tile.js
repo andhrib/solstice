@@ -8,9 +8,9 @@ import {
     Transform
 } from '../engine/core.js';
 
-import { loadResources } from 'engine/loaders/resources.js';
+import { TileShine } from './TileShine.js';
 
-const tileSize = 0.06;
+export const tileSize = 0.12;
 
 export class Tile {
     constructor(tileNodeArr, resources, { x, y }) {
@@ -23,7 +23,7 @@ export class Tile {
         this.node.addComponent(new Model({
             primitives: [
                 new Primitive({
-                    mesh: resources.mesh,
+                    mesh: resources.mesh_tile,
                     material: new Material({
                         baseTexture: new Texture({
                             image: image,
@@ -39,9 +39,22 @@ export class Tile {
         }));
 
         this.node.addComponent(new Transform({
-            translation: [x * tileSize * 2, 0, y * tileSize * 2],
+            translation: [x * tileSize, 0, y * tileSize],
             scale: [tileSize, tileSize, tileSize],
         }));
+
+        this.tileShineNode = new Node();
+        this.tileShine = new TileShine(this.tileShineNode, resources);
+        this.tileShineNode.addComponent(this.tileShine);
+        this.node.addChild(this.tileShineNode);
+    }
+
+    changeTempStatus(status) {
+        this.tileShine.changeTempStatus(status);
+    }
+
+    setPermaStatus(status) {
+        this.tileShine.setPermaStatus(status);
     }
 
     // update() {

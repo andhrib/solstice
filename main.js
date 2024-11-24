@@ -4,7 +4,7 @@ import * as WebGPU from 'engine/WebGPU.js';
 import { ResizeSystem } from 'engine/systems/ResizeSystem.js';
 import { UpdateSystem } from 'engine/systems/UpdateSystem.js';
 import { UnlitRenderer } from 'engine/renderers/UnlitRenderer.js';
-import { Tile } from './custom/Tile.js';
+import { Tile, tileSize } from './custom/Tile.js';
 
 import {
     Camera,
@@ -20,22 +20,29 @@ import {
 import { loadResources } from 'engine/loaders/resources.js';
 
 const resources = await loadResources({
-    'mesh': new URL('models/tile/tile.json', import.meta.url),
-    'image1': new URL('models/tile/Ground_Night_Diffuse1.png', import.meta.url),
-    'image2': new URL('models/tile/Ground_Night_Diffuse2.png', import.meta.url),
+    'mesh_tile': new URL('models/tile/tile.json', import.meta.url),
+    'mesh_cube': new URL('models/cube/cube.json', import.meta.url),
+    'image1': new URL('models/tile/Ground_Night_Diffuse1.jpg', import.meta.url),
+    'image2': new URL('models/tile/Ground_Night_Diffuse2.jpg', import.meta.url),
+    'glow_yellow': new URL('models/tile/glow_yellow.jpg', import.meta.url),
+    'glow_red': new URL('models/tile/glow_red.jpg', import.meta.url),
+    'glow_green': new URL('models/tile/glow_green.jpg', import.meta.url),
+    'glow_purple': new URL('models/tile/glow_purple.jpg', import.meta.url),
 });
 
 const canvas = document.querySelector('canvas');
 const renderer = new UnlitRenderer(canvas);
 await renderer.initialize();
 
+const gridSize = 15; // Number of tiles in each dimension
+const gridCenter = Math.floor(gridSize / 2);
+const cameraDistance = 10;
+
 const scene = new Node();
 
 const camera = new Node();
-let cameraPosition = [1.5, 1, 1.5];
-let cameraRotation = quat.create();
-quat.rotateY(cameraRotation, cameraRotation, Math.PI / 4);
-quat.rotateX(cameraRotation, cameraRotation, -Math.PI / 4);
+let cameraPosition = [((gridSize - 1) * tileSize / 2) + cameraDistance, cameraDistance, ((gridSize - 1) * tileSize / 2) + cameraDistance];
+let cameraRotation = quat.fromEuler(quat.create(), -Math.asin(1 / Math.sqrt(3)) * (180 / Math.PI), 45, 0)
 camera.addComponent(new Transform({
     translation: cameraPosition,
     rotation: cameraRotation,
@@ -45,8 +52,7 @@ camera.addComponent(new Camera({
 }));
 scene.addChild(camera);
 
-// Create a 2D array of tiles (15x15)
-const gridSize = 15; // Number of tiles in each dimension
+// Create a 2D array of tiles
 const tileNodeArr = Array.from({ length: gridSize }, () => (Array.from({ length: gridSize }, () => new Node())));
 for (let x = 0; x < gridSize; x++) {
     for (let y = 0; y < gridSize; y++) {
@@ -55,60 +61,8 @@ for (let x = 0; x < gridSize; x++) {
     }
 }
 
-// for (let i = 0; i < gridSize; i++) {
-//     for (let j = 0; j < gridSize; j++) {
-//         const tile = new Node();
-//         const image = (i + j) % 2 === 0 ? resources.image1 : resources.image2;
-//         let tileTranslation = [i * tileSize * 2, 0, j * tileSize * 2];
-//         vec3.add(tileTranslation, tileTranslation, gridOffset);
-//         tile.addComponent(new Transform({
-//             translation: tileTranslation,
-//             scale: [tileSize, tileSize, tileSize],
-//         }));
-//         tile.addComponent(new Model({
-//             primitives: [
-//                 new Primitive({
-//                     mesh: resources.mesh,
-//                     material: new Material({
-//                         baseTexture: new Texture({
-//                             image: image,
-//                             sampler: new Sampler({
-//                                 minFilter: 'nearest',
-//                                 magFilter: 'nearest',
-//                                 addressModeU: 'repeat',
-//                             }),
-//                         }),
-//                     }),
-//                 }),
-//             ],
-//         }));
-//         scene.addChild(tile);
-//     }
-// }
-
-// const tile = new Node();
-// tile.addComponent(new Transform({
-//     scale: [0.05, 0.05, 0.05],
-// }));
-// tile.addComponent(new Model({
-//     primitives: [
-//         new Primitive({
-//             mesh: resources.mesh,
-//             material: new Material({
-//                 baseTexture: new Texture({
-//                     image: resources.image1,
-//                     sampler: new Sampler({
-//                         minFilter: 'nearest',
-//                         magFilter: 'nearest',
-//                         addressModeU: 'repeat',
-//                         addressModeV: 'repeat',
-//                     }),
-//                 }),
-//             }),
-//         }),
-//     ],
-// }));
-// scene.addChild(tile);
+// Game logic
+    tileNodeArr[gridCenter][gridCenter].getComponentOfType(Tile).setPermaStatus("yellow");
 
 function update(t, dt) {
     scene.traverse(node => {

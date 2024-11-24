@@ -195,6 +195,9 @@ export class UnlitRenderer extends BaseRenderer {
     }
 
     renderNode(node, modelMatrix = mat4.create()) {
+        if (!node.enabled) {
+            return;
+        }
         const localMatrix = getLocalModelMatrix(node);
         modelMatrix = mat4.multiply(mat4.create(), modelMatrix, localMatrix);
         const normalMatrix = mat4.normalFromMat4(mat4.create(), modelMatrix);

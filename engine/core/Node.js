@@ -1,9 +1,10 @@
 export class Node {
 
-    constructor() {
+    constructor(enabled = true) {
         this.parent = null;
         this.children = [];
         this.components = [];
+        this.enabled = enabled;
     }
 
     addChild(node) {
