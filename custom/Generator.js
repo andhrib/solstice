@@ -43,7 +43,6 @@ const generatorPattern = [
 ];
 
 const offsetToCamera = 1;
-const baseTranslation = [offsetToCamera + gridCenter * tileSize, offsetToCamera, offsetToCamera + gridCenter * tileSize];
 
 export class Generator {
     constructor(node, resources, tileArr, idx) {
@@ -55,10 +54,13 @@ export class Generator {
         this.xNext = this.x;
         this.yNext = this.y;
         this.yMax = (idx == 2) ? gridSize - 1 : gridSize;
-        this.needUpdate = true;
-
+        this.needUpdate = false;
+        this.baseTranslation = [offsetToCamera + gridCenter * tileSize, offsetToCamera, offsetToCamera + gridCenter * tileSize];
+        if (idx == 2) {
+            this.baseTranslation[2] += tileSize / 2;
+        }
         this.transform = new Transform({
-            translation: baseTranslation,
+            translation: [...this.baseTranslation],
             scale: [tileSize, tileSize, tileSize],
         });
 
@@ -67,42 +69,55 @@ export class Generator {
         this.node.removeComponentsOfType(Transform);
         this.node.addComponent(this.transform);
 
-        window.addEventListener('keydown', this.handleKeyDown.bind(this));
+        this.keyDownBind = this.handleKeyDown.bind(this);
     }
 
     update(t, dt) {
         if (this.needUpdate) {
             this.needUpdate = false;
             
+            this.clearPattern();
+
+            this.x = this.xNext;
+            this.y = this.yNext;
+
+            this.setPattern();
+        }
+    }
+
+    clearPattern() {
+        for (const gp of generatorPattern[this.idx]) {
+            const x = this.x + gp.x;
+            const y = this.y + gp.y;
+            if (x >= 0 && x < gridSize && y >= 0 && y < gridSize) {
+                this.tileArr[x][y].setTempStatus("none");
+            }
+        }
+    }
+
+    setPattern() {
+        let color = "green";
             for (const gp of generatorPattern[this.idx]) {
                 const x = this.x + gp.x;
                 const y = this.y + gp.y;
-                if (x >= 0 && x < gridSize && y >= 0 && y < this.yMax) {
-                    this.tileArr[x][y].setTempStatus("none");
-                }
-            }
 
-            let color = "green";
-            for (const gp of generatorPattern[this.idx]) {
-                const xNext = this.xNext + gp.x;
-                const yNext = this.yNext + gp.y;
-
-                if (xNext >= 0 && xNext < gridSize && yNext >= 0 && yNext < this.yMax) {
+                if (x >= 0 && x < gridSize && y >= 0 && y < gridSize) {
                     if (gp.type == "generator") {
-                        this.tileArr[xNext][yNext].setTempStatus("generator");
-                        if ( this.tileArr[xNext][yNext].getPermaStatus() !== "yellow") {
+                        this.tileArr[x][y].setTempStatus("generator");
+                        if ( this.tileArr[x][y].getPermaStatus() !== "yellow") {
                             color = "red";
                         }
                     }
                     else {
-                        this.tileArr[xNext][yNext].setTempStatus(color);
+                        this.tileArr[x][y].setTempStatus(color);
                     }
                 }
             }
+    }
 
-            this.x = this.xNext;
-            this.y = this.yNext;
-        }
+    changeParent(newParent) {
+        this.node.remove();
+        newParent.addChild(this.node);
     }
 
     handleKeyDown(event) {
@@ -136,6 +151,26 @@ export class Generator {
                 }
                 break;
         }
+        console.log("Event at generator: " + this.idx);
+    }
+
+
+    enable() {
+        this.node.enabled = true;
+        this.needUpdate = true;
+        this.xNext = gridCenter;
+        this.yNext = gridCenter;
+        this.transform.translation = [...this.baseTranslation];
+        window.addEventListener('keydown', this.keyDownBind);
+        //console.log("Generator enabled: " + this.idx);
+    }
+
+    disable() {
+        this.node.enabled = false;
+        this.needUpdate = false;
+        this.clearPattern();
+        window.removeEventListener('keydown', this.keyDownBind);
+        //console.log("Generator disabled: " + this.idx);
     }
 
 }

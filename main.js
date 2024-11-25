@@ -5,7 +5,7 @@ import { ResizeSystem } from 'engine/systems/ResizeSystem.js';
 import { UpdateSystem } from 'engine/systems/UpdateSystem.js';
 import { UnlitRenderer } from 'engine/renderers/UnlitRenderer.js';
 import { Tile } from './custom/Tile.js';
-import { Generator} from './custom/Generator.js';
+import { GeneratorManager} from './custom/GeneratorManager.js';
 import { tileSize, gridCenter, gridSize } from './custom/gameParameters.js';
 
 import {
@@ -61,22 +61,11 @@ const tileArr = Array.from({ length: gridSize }, (_, x) => (Array.from({ length:
     scene.addChild(node);
     return tile;
 })));
+tileArr[gridCenter][gridCenter].setPermaStatus("yellow");
 
 
-// Game logic
-    tileArr[gridCenter][gridCenter].setPermaStatus("yellow");
-    const loader = new GLTFLoader();
-    await loader.load("/models/generator/Generators_pack_V2.gltf");
-    const generatorScene = loader.loadScene(loader.defaultScene);
-    const generator1 = generatorScene.children[0];
-    generator1.remove();
-    //console.log(generator1.components[1].primitives[0].material)
-    generator1.addComponent(new Generator(generator1, resources, tileArr, 0));
-    scene.addChild(generator1);
-    
-    // const generatorScene = new Node();
-    // generatorScene.addComponent(new Generator(generatorScene, resources, tileArr));
-    // scene.addChild(generatorScene);
+const generatorManager = new GeneratorManager();
+await generatorManager.initialize(scene, resources, tileArr);
 
 function update(t, dt) {
     scene.traverse(node => {
