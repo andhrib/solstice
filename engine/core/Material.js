@@ -14,6 +14,8 @@ export class Material {
         occlusionFactor = 1,
         roughnessFactor = 1,
         metalnessFactor = 1,
+
+        useCache = true,
     } = {}) {
         this.baseTexture = baseTexture;
         this.emissionTexture = emissionTexture;
@@ -28,6 +30,8 @@ export class Material {
         this.occlusionFactor = occlusionFactor;
         this.roughnessFactor = roughnessFactor;
         this.metalnessFactor = metalnessFactor;
+
+        this.useCache = useCache;
     }
 
 }

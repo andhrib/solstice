@@ -8,17 +8,16 @@ import {
     Transform
 } from '../engine/core.js';
 
-import { TileShine } from './TileShine.js';
+import { quat } from '../lib/glm.js';
 
-export const tileSize = 0.12;
+import { tileSize } from './gameParameters.js';
+
+const offsetToCamera = 10;
+const glowSize = 0.5;
 
 export class Tile {
-    constructor(tileNodeArr, resources, { x, y }) {
-        this.tileNodeArr = tileNodeArr;
-        this.node = tileNodeArr[x][y];
-        this.resources = resources;
-        this.x = x;
-        this.y = y;
+    constructor(node, resources, { x, y }) {
+        this.node = node;
         const image = (x + y) % 2 === 0 ? resources.image1 : resources.image2;
         this.node.addComponent(new Model({
             primitives: [
@@ -43,19 +42,134 @@ export class Tile {
             scale: [tileSize, tileSize, tileSize],
         }));
 
-        this.tileShineNode = new Node();
-        this.tileShine = new TileShine(this.tileShineNode, resources);
-        this.tileShineNode.addComponent(this.tileShine);
+        
+        this.yellowTexture = new Texture({
+            image: resources.glow_yellow,
+            sampler: new Sampler({
+                minFilter: 'nearest',
+                magFilter: 'nearest',
+                addressModeU: 'repeat',
+            }),
+        });
+        this.purpleTexture = new Texture({
+            image: resources.glow_purple,
+            sampler: new Sampler({
+                minFilter: 'nearest',
+                magFilter: 'nearest',
+                addressModeU: 'repeat',
+            }),
+        });
+        this.greenTexture = new Texture({
+            image: resources.glow_green,
+            sampler: new Sampler({
+                minFilter: 'nearest',
+                magFilter: 'nearest',
+                addressModeU: 'repeat',
+            }),
+        });
+        this.redTexture = new Texture({
+            image: resources.glow_red,
+            sampler: new Sampler({
+                minFilter: 'nearest',
+                magFilter: 'nearest',
+                addressModeU: 'repeat',
+            }),
+        });
+        this.material = new Material({
+            baseTexture: this.yellowTexture,
+            useCache: false,
+        }),
+
+        this.tileShineNode = new Node(false);
+        this.tileShineNode.addComponent(new Model({ 
+            primitives: [
+                new Primitive({
+                    mesh: resources.mesh_tile,
+                    material: this.material,
+                }),
+            ],
+        }));
+        this.tileShineNode.addComponent(new Transform({
+            translation: [offsetToCamera, offsetToCamera, offsetToCamera],
+            scale: [glowSize, glowSize, glowSize],
+            rotation: quat.fromEuler(quat.create(), 0, 45, 0),
+        }));
+
         this.node.addChild(this.tileShineNode);
+
+        this.permaStatus = "none";
+        this.tempStatus = "none";
     }
 
-    changeTempStatus(status) {
-        this.tileShine.changeTempStatus(status);
+    setTempStatus(status) {
+        switch (status) {
+            case "generator":
+                this.tempStatus = "generator";
+                this.tileShineNode.enabled = false;
+                break;
+            case "none":
+                switch (this.permaStatus) {
+                    case "none":
+                    case "built":
+                        this.tileShineNode.enabled = false;
+                        break;
+                    case "yellow":
+                        this.material.baseTexture = this.yellowTexture;
+                        this.tileShineNode.enabled = true;
+                        break;
+                    case "purple":
+                        this.material.baseTexture = this.purpleTexture;
+                        this.tileShineNode.enabled = true;
+                        break;
+                    default:
+                        console.log("Invalid status");
+                        break;
+                }
+                this.tempStatus = "none";
+                break;
+            case "red":
+                this.material.baseTexture = this.redTexture;
+                this.tileShineNode.enabled = true;
+                this.tempStatus = "red";
+                break;
+            case "green":
+                this.material.baseTexture = this.greenTexture;
+                this.tileShineNode.enabled = true;
+                this.tempStatus = "green";
+                break;
+            default:
+                console.log("Invalid status");
+                break;
+        }
     }
 
     setPermaStatus(status) {
-        this.tileShine.setPermaStatus(status);
+        switch (status) {
+            case "built":
+                this.tileShineNode.enabled = false;
+                this.permaStatus = "built";
+                break;
+            case "yellow":
+                this.material.baseTexture = this.yellowTexture;
+                this.tileShineNode.enabled = true;
+                this.permaStatus = "yellow";
+                break;
+            case "purple":
+                this.material.baseTexture = this.purpleTexture;
+                this.tileShineNode.enabled = true;
+                this.permaStatus = "purple";
+                break;
+            default:
+                console.log("Invalid status");
+                break;
+        }
     }
+
+    getPermaStatus() {
+        return this.permaStatus;
+    }
+
+
 
     // update() {
   

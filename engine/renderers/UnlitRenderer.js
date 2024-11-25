@@ -131,7 +131,7 @@ export class UnlitRenderer extends BaseRenderer {
     }
 
     prepareMaterial(material) {
-        if (this.gpuObjects.has(material)) {
+        if (material.useCache && this.gpuObjects.has(material)) {
             return this.gpuObjects.get(material);
         }
 

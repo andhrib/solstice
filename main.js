@@ -4,7 +4,9 @@ import * as WebGPU from 'engine/WebGPU.js';
 import { ResizeSystem } from 'engine/systems/ResizeSystem.js';
 import { UpdateSystem } from 'engine/systems/UpdateSystem.js';
 import { UnlitRenderer } from 'engine/renderers/UnlitRenderer.js';
-import { Tile, tileSize } from './custom/Tile.js';
+import { Tile } from './custom/Tile.js';
+import { Generator} from './custom/Generator.js';
+import { tileSize, gridCenter, gridSize } from './custom/gameParameters.js';
 
 import {
     Camera,
@@ -18,6 +20,7 @@ import {
 } from 'engine/core.js';
 
 import { loadResources } from 'engine/loaders/resources.js';
+import { GLTFLoader } from 'engine/loaders/GLTFLoader.js';
 
 const resources = await loadResources({
     'mesh_tile': new URL('models/tile/tile.json', import.meta.url),
@@ -30,18 +33,16 @@ const resources = await loadResources({
     'glow_purple': new URL('models/tile/glow_purple.jpg', import.meta.url),
 });
 
-const canvas = document.querySelector('canvas');
+const canvas = document.querySelector('canvas');    
 const renderer = new UnlitRenderer(canvas);
 await renderer.initialize();
 
-const gridSize = 15; // Number of tiles in each dimension
-const gridCenter = Math.floor(gridSize / 2);
 const cameraDistance = 10;
 
 const scene = new Node();
 
 const camera = new Node();
-let cameraPosition = [((gridSize - 1) * tileSize / 2) + cameraDistance, cameraDistance, ((gridSize - 1) * tileSize / 2) + cameraDistance];
+let cameraPosition = [(gridCenter * tileSize) + cameraDistance, cameraDistance, (gridCenter * tileSize) + cameraDistance];
 let cameraRotation = quat.fromEuler(quat.create(), -Math.asin(1 / Math.sqrt(3)) * (180 / Math.PI), 45, 0)
 camera.addComponent(new Transform({
     translation: cameraPosition,
@@ -53,16 +54,29 @@ camera.addComponent(new Camera({
 scene.addChild(camera);
 
 // Create a 2D array of tiles
-const tileNodeArr = Array.from({ length: gridSize }, () => (Array.from({ length: gridSize }, () => new Node())));
-for (let x = 0; x < gridSize; x++) {
-    for (let y = 0; y < gridSize; y++) {
-        tileNodeArr[x][y].addComponent(new Tile(tileNodeArr, resources, { x, y }));
-        scene.addChild(tileNodeArr[x][y]);
-    }
-}
+const tileArr = Array.from({ length: gridSize }, (_, x) => (Array.from({ length: gridSize }, (_, y) => {
+    const node = new Node();
+    const tile = new Tile(node, resources, { x, y });
+    node.addComponent(tile);
+    scene.addChild(node);
+    return tile;
+})));
+
 
 // Game logic
-    tileNodeArr[gridCenter][gridCenter].getComponentOfType(Tile).setPermaStatus("yellow");
+    tileArr[gridCenter][gridCenter].setPermaStatus("yellow");
+    const loader = new GLTFLoader();
+    await loader.load("/models/generator/Generators_pack_V2.gltf");
+    const generatorScene = loader.loadScene(loader.defaultScene);
+    const generator1 = generatorScene.children[0];
+    generator1.remove();
+    //console.log(generator1.components[1].primitives[0].material)
+    generator1.addComponent(new Generator(generator1, resources, tileArr, 0));
+    scene.addChild(generator1);
+    
+    // const generatorScene = new Node();
+    // generatorScene.addComponent(new Generator(generatorScene, resources, tileArr));
+    // scene.addChild(generatorScene);
 
 function update(t, dt) {
     scene.traverse(node => {
