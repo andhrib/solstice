@@ -121,7 +121,8 @@ export class Generator {
                         }
                     }
                     else {
-                        this.tileArr[x][y].setTempStatus(this.status);
+                        const tempStatus = this.status == "green" ? (gp.type == "yellow" ? "green" : "darkGreen") : (gp.type == "yellow" ? "red" : "darkRed");
+                        this.tileArr[x][y].setTempStatus(tempStatus);
                     }
                 }
             }

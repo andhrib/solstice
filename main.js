@@ -29,9 +29,15 @@ const resources = await loadResources({
     'image2': new URL('models/tile/Ground_Night_Diffuse2.jpg', import.meta.url),
     'image3': new URL('models/tile/Ground_Night_Diffuse3.jpg', import.meta.url),
     'image4': new URL('models/tile/Ground_Night_Diffuse4.jpg', import.meta.url),
+    'normal1': new URL('models/tile/Ground_Night_Normal1.jpg', import.meta.url),
+    'normal2': new URL('models/tile/Ground_Night_Normal2.jpg', import.meta.url),
+    'normal3': new URL('models/tile/Ground_Night_Normal3.jpg', import.meta.url),
+    'normal4': new URL('models/tile/Ground_Night_Normal4.jpg', import.meta.url),
     'glow_yellow': new URL('models/tile/glow_yellow.jpg', import.meta.url),
     'glow_red': new URL('models/tile/glow_red.jpg', import.meta.url),
+    'glow_dark_red': new URL('models/tile/glow_dark_red.jpg', import.meta.url),
     'glow_green': new URL('models/tile/glow_green.jpg', import.meta.url),
+    'glow_dark_green': new URL('models/tile/glow_dark_green.jpg', import.meta.url),
     'glow_purple': new URL('models/tile/glow_purple.jpg', import.meta.url),
 });
 

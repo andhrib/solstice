@@ -75,6 +75,22 @@ export class Tile {
                 addressModeU: 'repeat',
             }),
         });
+        this.darkGreenTexture = new Texture({
+            image: resources.glow_dark_green,
+            sampler: new Sampler({
+                minFilter: 'nearest',
+                magFilter: 'nearest',
+                addressModeU: 'repeat',
+            }),
+        });
+        this.darkRedTexture = new Texture({
+            image: resources.glow_dark_red,
+            sampler: new Sampler({
+                minFilter: 'nearest',
+                magFilter: 'nearest',
+                addressModeU: 'repeat',
+            }),
+        });
         this.material = new Material({
             baseTexture: this.yellowTexture,
             useCache: false,
@@ -136,6 +152,16 @@ export class Tile {
                 this.material.baseTexture = this.greenTexture;
                 this.tileShineNode.enabled = true;
                 this.tempStatus = "green";
+                break;
+            case "darkGreen":
+                this.material.baseTexture = this.darkGreenTexture;
+                this.tileShineNode.enabled = true;
+                this.tempStatus = "darkGreen";
+                break;
+            case "darkRed":
+                this.material.baseTexture = this.darkRedTexture;
+                this.tileShineNode.enabled = true;
+                this.tempStatus = "darkRed";
                 break;
             default:
                 console.log("Invalid status");
