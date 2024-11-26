@@ -18,7 +18,7 @@ const glowSize = 0.5;
 export class Tile {
     constructor(node, resources, { x, y }) {
         this.node = node;
-        const image = (x + y) % 2 === 0 ? resources.image1 : resources.image2;
+        const image = (x + y) % 2 == 0 ? ((x + y) % 4 == 0 ? resources.image1 : resources.image3) : ((x + y) % 4 == 1 ? resources.image2 : resources.image4);
         this.node.addComponent(new Model({
             primitives: [
                 new Primitive({
@@ -110,7 +110,7 @@ export class Tile {
             case "none":
                 switch (this.permaStatus) {
                     case "none":
-                    case "built":
+                    case "generator":
                         this.tileShineNode.enabled = false;
                         break;
                     case "yellow":
@@ -144,34 +144,36 @@ export class Tile {
     }
 
     setPermaStatus(status) {
+        if (this.permaStatus == "generator") {
+            return 0;
+        }
+        let pointChange = 0;
         switch (status) {
-            case "built":
+            case "generator":
                 this.tileShineNode.enabled = false;
-                this.permaStatus = "built";
+                this.permaStatus = "generator";
+                pointChange = -1;
                 break;
             case "yellow":
-                this.material.baseTexture = this.yellowTexture;
-                this.tileShineNode.enabled = true;
-                this.permaStatus = "yellow";
+                if (this.permaStatus == "none") {
+                    this.material.baseTexture = this.yellowTexture;
+                    this.tileShineNode.enabled = true;
+                    pointChange = 1;
+                    this.permaStatus = "yellow";
+                }
                 break;
             case "purple":
                 this.material.baseTexture = this.purpleTexture;
                 this.tileShineNode.enabled = true;
+                pointChange = (this.permaStatus == "yellow") ? -1 : 0;
                 this.permaStatus = "purple";
                 break;
             default:
                 console.log("Invalid status");
                 break;
         }
+
+        return pointChange;
     }
 
-    getPermaStatus() {
-        return this.permaStatus;
-    }
-
-
-
-    // update() {
-  
-    // }
 }

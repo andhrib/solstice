@@ -5,7 +5,7 @@ import { ResizeSystem } from 'engine/systems/ResizeSystem.js';
 import { UpdateSystem } from 'engine/systems/UpdateSystem.js';
 import { UnlitRenderer } from 'engine/renderers/UnlitRenderer.js';
 import { Tile } from './custom/Tile.js';
-import { GeneratorManager} from './custom/GeneratorManager.js';
+import { GameManager } from './custom/GameManager.js';
 import { tileSize, gridCenter, gridSize } from './custom/gameParameters.js';
 
 import {
@@ -24,9 +24,11 @@ import { GLTFLoader } from 'engine/loaders/GLTFLoader.js';
 
 const resources = await loadResources({
     'mesh_tile': new URL('models/tile/tile.json', import.meta.url),
-    'mesh_cube': new URL('models/cube/cube.json', import.meta.url),
+    //'mesh_cube': new URL('models/cube/cube.json', import.meta.url),
     'image1': new URL('models/tile/Ground_Night_Diffuse1.jpg', import.meta.url),
     'image2': new URL('models/tile/Ground_Night_Diffuse2.jpg', import.meta.url),
+    'image3': new URL('models/tile/Ground_Night_Diffuse3.jpg', import.meta.url),
+    'image4': new URL('models/tile/Ground_Night_Diffuse4.jpg', import.meta.url),
     'glow_yellow': new URL('models/tile/glow_yellow.jpg', import.meta.url),
     'glow_red': new URL('models/tile/glow_red.jpg', import.meta.url),
     'glow_green': new URL('models/tile/glow_green.jpg', import.meta.url),
@@ -61,11 +63,12 @@ const tileArr = Array.from({ length: gridSize }, (_, x) => (Array.from({ length:
     scene.addChild(node);
     return tile;
 })));
-tileArr[gridCenter][gridCenter].setPermaStatus("yellow");
 
+// const loader = new GLTFLoader();
+// await loader.load("/models/generator/Generators_pack_V2.gltf");
 
-const generatorManager = new GeneratorManager();
-await generatorManager.initialize(scene, resources, tileArr);
+const generatorManager = new GameManager();
+await generatorManager.initialize(scene, tileArr);
 
 function update(t, dt) {
     scene.traverse(node => {
