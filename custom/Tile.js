@@ -10,7 +10,7 @@ import {
 
 import { quat } from '../lib/glm.js';
 
-import { tileSize } from './gameParameters.js';
+import { tileSize, colors } from './gameParameters.js';
 
 const offsetToCamera = 10;
 const glowSize = 0.5;
@@ -40,60 +40,18 @@ export class Tile {
         this.node.addComponent(new Transform({
             translation: [x * tileSize, 0, y * tileSize],
             scale: [tileSize, tileSize, tileSize],
-        }));
-
+        }));        
         
-        this.yellowTexture = new Texture({
-            image: resources.glow_yellow,
-            sampler: new Sampler({
-                minFilter: 'nearest',
-                magFilter: 'nearest',
-                addressModeU: 'repeat',
-            }),
-        });
-        this.purpleTexture = new Texture({
-            image: resources.glow_purple,
-            sampler: new Sampler({
-                minFilter: 'nearest',
-                magFilter: 'nearest',
-                addressModeU: 'repeat',
-            }),
-        });
-        this.greenTexture = new Texture({
-            image: resources.glow_green,
-            sampler: new Sampler({
-                minFilter: 'nearest',
-                magFilter: 'nearest',
-                addressModeU: 'repeat',
-            }),
-        });
-        this.redTexture = new Texture({
-            image: resources.glow_red,
-            sampler: new Sampler({
-                minFilter: 'nearest',
-                magFilter: 'nearest',
-                addressModeU: 'repeat',
-            }),
-        });
-        this.darkGreenTexture = new Texture({
-            image: resources.glow_dark_green,
-            sampler: new Sampler({
-                minFilter: 'nearest',
-                magFilter: 'nearest',
-                addressModeU: 'repeat',
-            }),
-        });
-        this.darkRedTexture = new Texture({
-            image: resources.glow_dark_red,
-            sampler: new Sampler({
-                minFilter: 'nearest',
-                magFilter: 'nearest',
-                addressModeU: 'repeat',
-            }),
-        });
         this.material = new Material({
-            baseTexture: this.yellowTexture,
-            useCache: false,
+            baseTexture: new Texture({
+                image: resources.glow_base,
+                sampler: new Sampler({
+                    minFilter: 'nearest',
+                    magFilter: 'nearest',
+                    addressModeU: 'repeat',
+                }),
+                baseFactor: colors.yellow,
+            }),
         }),
 
         this.tileShineNode = new Node(false);
@@ -130,11 +88,11 @@ export class Tile {
                         this.tileShineNode.enabled = false;
                         break;
                     case "yellow":
-                        this.material.baseTexture = this.yellowTexture;
+                        this.material.baseFactor = colors.yellow;
                         this.tileShineNode.enabled = true;
                         break;
                     case "purple":
-                        this.material.baseTexture = this.purpleTexture;
+                        this.material.baseFactor = colors.purple;
                         this.tileShineNode.enabled = true;
                         break;
                     default:
@@ -144,22 +102,22 @@ export class Tile {
                 this.tempStatus = "none";
                 break;
             case "red":
-                this.material.baseTexture = this.redTexture;
+                this.material.baseFactor = colors.red;
                 this.tileShineNode.enabled = true;
                 this.tempStatus = "red";
                 break;
             case "green":
-                this.material.baseTexture = this.greenTexture;
+                this.material.baseFactor = colors.green;
                 this.tileShineNode.enabled = true;
                 this.tempStatus = "green";
                 break;
             case "darkGreen":
-                this.material.baseTexture = this.darkGreenTexture;
+                this.material.baseFactor = colors.darkGreen;
                 this.tileShineNode.enabled = true;
                 this.tempStatus = "darkGreen";
                 break;
             case "darkRed":
-                this.material.baseTexture = this.darkRedTexture;
+                this.material.baseFactor = colors.darkRed;
                 this.tileShineNode.enabled = true;
                 this.tempStatus = "darkRed";
                 break;
@@ -182,14 +140,14 @@ export class Tile {
                 break;
             case "yellow":
                 if (this.permaStatus == "none") {
-                    this.material.baseTexture = this.yellowTexture;
+                    this.material.baseFactor = colors.yellow;
                     this.tileShineNode.enabled = true;
                     pointChange = 1;
                     this.permaStatus = "yellow";
                 }
                 break;
             case "purple":
-                this.material.baseTexture = this.purpleTexture;
+                this.material.baseFactor = colors.purple;
                 this.tileShineNode.enabled = true;
                 pointChange = (this.permaStatus == "yellow") ? -1 : 0;
                 this.permaStatus = "purple";

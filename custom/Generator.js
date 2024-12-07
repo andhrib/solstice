@@ -8,7 +8,9 @@ import {
   Transform,
 } from "../engine/core.js";
 
-import { gridCenter, gridSize, tileSize } from "./gameParameters.js";
+import { quat } from "../lib/glm.js";
+
+import { gridCenter, gridSize, tileSize, colors } from "./gameParameters.js";
 
 const generatorPattern = [
   [
@@ -55,13 +57,18 @@ export class Generator {
       offsetToCamera,
       offsetToCamera + gridCenter * tileSize,
     ];
+    this.rotation = [0, 0, 0, 1];
     if (idx == 2) {
       this.baseTranslation[2] += tileSize / 2;
+      this.rotation = quat.fromEuler(quat.create(), 0, 180, 0);
     }
     this.transform = new Transform({
       translation: [...this.baseTranslation],
       scale: [tileSize, tileSize, tileSize],
+      rotation: this.rotation,
     });
+
+    this.materials = this.node.getComponentOfType(Model).primitives.map(p => p.material);
 
     this.x = gridCenter;
     this.y = gridCenter;
@@ -133,6 +140,10 @@ export class Generator {
               : "darkRed";
           this.tileArr[x][y].setTempStatus(tempStatus);
         }
+
+        this.materials.forEach((_, index) => {
+          this.materials[index].baseFactor = colors[this.status];
+        });
       }
     }
   }
@@ -148,6 +159,9 @@ export class Generator {
     //console.log(this.gameManager.points + "/" + this.gameManager.target);
 
     const placedModel = new Node();
+    this.materials.forEach((_, index) => {
+      this.materials[index].baseFactor = colors.white;
+    });
     placedModel.addComponent(_.cloneDeep(this.node.getComponentOfType(Model)));
     placedModel.addComponent(_.cloneDeep(this.transform));
     this.scene.addChild(placedModel);

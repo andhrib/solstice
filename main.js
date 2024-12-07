@@ -6,7 +6,7 @@ import { UpdateSystem } from 'engine/systems/UpdateSystem.js';
 import { UnlitRenderer } from 'engine/renderers/UnlitRenderer.js';
 import { Tile } from './custom/Tile.js';
 import { GameManager } from './custom/GameManager.js';
-import { tileSize, gridCenter, gridSize } from './custom/gameParameters.js';
+import { tileSize, gridCenter, gridSize, gridOffset } from './custom/gameParameters.js';
 
 import {
     Camera,
@@ -24,21 +24,11 @@ import { GLTFLoader } from 'engine/loaders/GLTFLoader.js';
 
 const resources = await loadResources({
     'mesh_tile': new URL('models/tile/tile.json', import.meta.url),
-    //'mesh_cube': new URL('models/cube/cube.json', import.meta.url),
     'image1': new URL('models/tile/Ground_Night_Diffuse1.jpg', import.meta.url),
     'image2': new URL('models/tile/Ground_Night_Diffuse2.jpg', import.meta.url),
     'image3': new URL('models/tile/Ground_Night_Diffuse3.jpg', import.meta.url),
     'image4': new URL('models/tile/Ground_Night_Diffuse4.jpg', import.meta.url),
-    'normal1': new URL('models/tile/Ground_Night_Normal1.jpg', import.meta.url),
-    'normal2': new URL('models/tile/Ground_Night_Normal2.jpg', import.meta.url),
-    'normal3': new URL('models/tile/Ground_Night_Normal3.jpg', import.meta.url),
-    'normal4': new URL('models/tile/Ground_Night_Normal4.jpg', import.meta.url),
-    'glow_yellow': new URL('models/tile/glow_yellow.jpg', import.meta.url),
-    'glow_red': new URL('models/tile/glow_red.jpg', import.meta.url),
-    'glow_dark_red': new URL('models/tile/glow_dark_red.jpg', import.meta.url),
-    'glow_green': new URL('models/tile/glow_green.jpg', import.meta.url),
-    'glow_dark_green': new URL('models/tile/glow_dark_green.jpg', import.meta.url),
-    'glow_purple': new URL('models/tile/glow_purple.jpg', import.meta.url),
+    'glow_base': new URL('models/tile/glow_base.jpg', import.meta.url),
 });
 
 const canvas = document.querySelector('canvas');    
@@ -50,7 +40,7 @@ const cameraDistance = 10;
 const scene = new Node();
 
 const camera = new Node();
-let cameraPosition = [(gridCenter * tileSize) + cameraDistance, cameraDistance, (gridCenter * tileSize) + cameraDistance];
+let cameraPosition = [gridOffset + cameraDistance, cameraDistance, gridOffset + cameraDistance];
 let cameraRotation = quat.fromEuler(quat.create(), -Math.asin(1 / Math.sqrt(3)) * (180 / Math.PI), 45, 0)
 camera.addComponent(new Transform({
     translation: cameraPosition,
