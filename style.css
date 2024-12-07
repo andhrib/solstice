@@ -130,3 +130,34 @@
     transform: translateY(0);
   }
 }
+
+.navodila {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  border-radius: 10px;
+  border: 2px solid white;
+  color: white;
+  padding: 15px;
+  width: 300px;
+  line-height: 24px;
+  background-color: rgba(255, 255, 255, 0.3);
+  opacity: 0.8;
+}
+
+.navodila h1 {
+  font-size: 26px;
+  margin-top: 0;
+}
+
+.navodila span {
+  padding: 1px 8px;
+  border-radius: 10px;
+  color: black;
+  background-color: rgba(232, 208, 139, 0.9);
+}
+
+.navodila ul {
+  padding-left: 15px;
+  margin-top: 0;
+}
