@@ -1,26 +1,18 @@
-import { vec3, mat4, quat } from 'glm';
-
-import * as WebGPU from 'engine/WebGPU.js';
+import { quat } from 'glm';
 import { ResizeSystem } from 'engine/systems/ResizeSystem.js';
 import { UpdateSystem } from 'engine/systems/UpdateSystem.js';
 import { UnlitRenderer } from 'engine/renderers/UnlitRenderer.js';
-import { Tile } from './custom/Tile.js';
-import { GameManager } from './custom/GameManager.js';
-import { tileSize, gridCenter, gridSize, gridOffset } from './custom/gameParameters.js';
+import { Tile } from './src/Tile.js';
+import { GameManager } from './src/GameManager.js';
+import { gridSize, gridOffset } from './src/gameParameters.js';
 
 import {
     Camera,
-    Material,
-    Model,
     Node,
-    Primitive,
-    Sampler,
-    Texture,
     Transform,
 } from 'engine/core.js';
 
 import { loadResources } from 'engine/loaders/resources.js';
-import { GLTFLoader } from 'engine/loaders/GLTFLoader.js';
 
 const resources = await loadResources({
     'mesh_tile': new URL('models/tile/tile.json', import.meta.url),
@@ -59,9 +51,6 @@ const tileArr = Array.from({ length: gridSize }, (_, x) => (Array.from({ length:
     scene.addChild(node);
     return tile;
 })));
-
-// const loader = new GLTFLoader();
-// await loader.load("/models/generator/Generators_pack_V2.gltf");
 
 const generatorManager = new GameManager();
 await generatorManager.initialize(scene, tileArr);
